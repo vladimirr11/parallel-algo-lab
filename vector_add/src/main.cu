@@ -2,9 +2,6 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-// C++ system includes
-#include <chrono>
-
 // Own includes
 #include "common/helpers.h"
 
@@ -20,7 +17,7 @@ float calcKahamSum(const float* resultVec, const int numElements) {
     return sum;
 }
 
-void cpuVectorAdd(float* hostA, float* hostB, float* hostC, const int n) {
+inline void cpuVectorAdd(float* hostA, float* hostB, float* hostC, const int n) {
     for (int i = 0; i < n; i++) {
         hostC[i] = hostA[i] + hostB[i];
     }
@@ -29,8 +26,9 @@ void cpuVectorAdd(float* hostA, float* hostB, float* hostC, const int n) {
 // Compute vector sum C = A + B
 __global__ void vectorAddKernel(const float* A, const float* B, float* C, const int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n) {
+    if (i <= n && i >= 0) {
         C[i] = A[i] + B[i];
+        //printf("%d\n", i);
     }
 }
 
@@ -98,8 +96,7 @@ int main() {
     auto hostEndTime = high_res_clock::now();
 
     const float hostResult = calcKahamSum(hostC, numElements);
-    const float cpuTime =
-        std::chrono::duration_cast<nanosec>(hostEndTime - hostStartTime).count() / 1e6;
+    const float cpuTime = cpuDuration<nanosec>(hostStartTime, hostEndTime) / 1e6;
     fprintf(stdout, "CPU time for vector addition of %d elements: [%f] - result %f\n", numElements,
             cpuTime, hostResult);
 

@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vector_add", "vector_add\ve
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common\common.vcxproj", "{7CD6133B-7A18-45BD-B13A-7BFF5397AA14}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "image_blur", "image_blur\image_blur.vcxproj", "{E81AD3AE-A5D3-4557-B11F-08D78228668A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{7CD6133B-7A18-45BD-B13A-7BFF5397AA14}.Debug|x64.Build.0 = Debug|x64
 		{7CD6133B-7A18-45BD-B13A-7BFF5397AA14}.Release|x64.ActiveCfg = Release|x64
 		{7CD6133B-7A18-45BD-B13A-7BFF5397AA14}.Release|x64.Build.0 = Release|x64
+		{E81AD3AE-A5D3-4557-B11F-08D78228668A}.Debug|x64.ActiveCfg = Debug|x64
+		{E81AD3AE-A5D3-4557-B11F-08D78228668A}.Debug|x64.Build.0 = Debug|x64
+		{E81AD3AE-A5D3-4557-B11F-08D78228668A}.Release|x64.ActiveCfg = Release|x64
+		{E81AD3AE-A5D3-4557-B11F-08D78228668A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
