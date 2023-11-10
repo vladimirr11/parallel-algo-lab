@@ -5,14 +5,14 @@
 // Own includes
 #include "common/helpers.h"
 
-// Third-party includes
+// Third party includes
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "common/stbi_image/stbi_image.h"
 #include "common/stbi_image/stbi_image_write.h"
 
 /// @brief Blurs an image.
-/// Note: this kernel will work on for rgb images. For grayscale images it
+/// Note: this kernel will work only for rgb images. For grayscale images it
 /// will not work.
 __global__ void imageBlurKernel(const unsigned char* inputPixels, unsigned char* outputPixels,
                                 const int width, const int height, const int numChannels,
@@ -32,16 +32,13 @@ __global__ void imageBlurKernel(const unsigned char* inputPixels, unsigned char*
         const int startBlurCol = col - (halfBlurKernel * numChannels);
         const int endBlurCol = col + (halfBlurKernel * numChannels);
         for (int blurRow = startBlurRow; blurRow <= endBlurRow; ++blurRow) {
-            if (blurRow >= 0 && blurRow < height) {
-                for (int blurCol = startBlurCol; blurCol <= endBlurCol; blurCol += 3) {
-                    if (blurCol >= 0 && blurCol < width * numChannels) {
-                        currRedPixelVal += inputPixels[blurRow * width * numChannels + blurCol];
-                        currGreenPixelVal +=
-                            inputPixels[blurRow * width * numChannels + blurCol + 1];
-                        currBluePixelVal +=
-                            inputPixels[blurRow * width * numChannels + blurCol + 2];
-                        blurKernelPixels++;
-                    }
+            for (int blurCol = startBlurCol; blurCol <= endBlurCol; blurCol += 3) {
+                if (blurCol >= 0 && blurCol < width * numChannels && blurRow >= 0 &&
+                    blurRow < height) {
+                    currRedPixelVal += inputPixels[blurRow * width * numChannels + blurCol];
+                    currGreenPixelVal += inputPixels[blurRow * width * numChannels + blurCol + 1];
+                    currBluePixelVal += inputPixels[blurRow * width * numChannels + blurCol + 2];
+                    blurKernelPixels++;
                 }
             }
         }
@@ -55,6 +52,9 @@ __global__ void imageBlurKernel(const unsigned char* inputPixels, unsigned char*
 }
 
 int main() {
+    // set max performance CUDA device
+    queryAndSetDevice();
+
     // load image
     int width, height, numChannels;
     const char* imagePath = "../image_blur/data/royal-bengal-tiger-1000x664.jpg";
