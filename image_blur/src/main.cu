@@ -80,7 +80,7 @@ int main() {
     handleCUDAError(cudaEventCreate(&start));
     handleCUDAError(cudaEventCreate(&stop));
 
-    // kernel launch config
+    // kernel execution configuration
     const int threadBlockDim = 16;
     const int gridWidth = ceil((float)(width) / threadBlockDim);
     const int gridHeight = ceil((float)(height) / threadBlockDim);

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+// C++ system includes
 #include <iostream>
 #include <chrono>
 #include <cassert>
@@ -44,7 +45,7 @@ inline int smVersion2Cores(const int majorVer, const int minorVer) {
         index++;
     }
 
-    fprintf(stderr, "Unknown architecture vesion %d.%d", majorVer, minorVer);
+    fprintf(stderr, "Unknown architecture version %d.%d", majorVer, minorVer);
     return -1;
 }
 
@@ -56,7 +57,7 @@ void queryAndSetDevice() {
         exit(EXIT_FAILURE);
     }
 
-    int maxComputePerf = -1, maxPerfDevice = -1;
+    int maxComputePerf = -1, maxPerfDevice = -1, cudaCores = -1;
     cudaDeviceProp deviceProps;
     for (int i = 0; i < deviceCount; i++) {
         handleCUDAError(cudaGetDeviceProperties(&deviceProps, i));
@@ -70,6 +71,7 @@ void queryAndSetDevice() {
         if (computePerf > maxComputePerf) {
             maxComputePerf = computePerf;
             maxPerfDevice = i;
+            cudaCores = numCoresPerSm;
         }
     }
 
@@ -83,13 +85,15 @@ void queryAndSetDevice() {
 
     printf("   --- Memory Information for device %d ---\n", maxPerfDevice);
     printf("Total global memory: %zu GB\n", deviceProps.totalGlobalMem / (size_t)1e9);
-    printf("Total constant memory: %ld KB\n", deviceProps.totalConstMem / (size_t)1e3);
-    printf("Max pitch memory: %zu GB\n", deviceProps.memPitch/ (size_t)1e9);
+    printf("Total constant memory: %zu KB\n", deviceProps.totalConstMem / (size_t)1e3);
+    printf("Max pitch memory: %zu GB\n", deviceProps.memPitch / (size_t)1e9);
 
     printf("   --- MP Information for device %d ---\n", maxPerfDevice);
     printf("Multiprocessor count: %d\n", deviceProps.multiProcessorCount);
-    printf("Shared memory per SM: %ld Bytes\n", deviceProps.sharedMemPerBlock);
-    printf("Registers per mp: %d\n", deviceProps.regsPerBlock);
+    printf("Cuda cores per MP: %d\n", cudaCores);
+    printf("Shared memory per MP: %zu Bytes\n", deviceProps.sharedMemPerBlock);
+    printf("Registers per MP: %d\n", deviceProps.regsPerBlock);
+    printf("Max number of thread blocks per MP: %d\n", deviceProps.maxBlocksPerMultiProcessor);
     printf("Threads in warp: %d\n", deviceProps.warpSize);
     printf("Max threads per block: %d\n", deviceProps.maxThreadsPerBlock);
     printf("Max grid dimensions: (%d, %d, %d)\n", deviceProps.maxGridSize[0],
