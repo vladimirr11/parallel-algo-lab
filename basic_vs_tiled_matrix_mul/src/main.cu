@@ -35,7 +35,8 @@ __global__ void tiledMatrixMulKernel(const float* M, const float* N, float* P, c
     const int32_t col = blockIdx.x * BLOCK_SIZE + threadIdx.x;
 
     float dotProd = 0.f;
-    for (int32_t phase = 0; phase < ceil(colsM / (float)BLOCK_SIZE); phase++) {
+    const int32_t numPhases = ceil(colsM / (float)BLOCK_SIZE);
+    for (int32_t phase = 0; phase < numPhases; phase++) {
         // Load the sub-matrices from device memory to shared memory
         if (row < rowsM && (phase * BLOCK_SIZE + tx) < colsM) {
             sM[ty][tx] = M[row * colsM + (phase * BLOCK_SIZE + tx)];
@@ -45,8 +46,17 @@ __global__ void tiledMatrixMulKernel(const float* M, const float* N, float* P, c
         }
         __syncthreads();
         // Multiply the two sub-matrices together
-        for (int32_t k = 0; k < BLOCK_SIZE; k++) {
-            dotProd += sM[ty][k] * sN[k][tx];
+        if (phase == numPhases - 1) {
+            // Handle the last phase of dot product computation in case colsM is not multiple of
+            // BLOCK_SIZE
+            for (int32_t k = 0; k < colsM - (phase * BLOCK_SIZE); k++) {
+                dotProd += sM[ty][k] * sN[k][tx];
+            }
+        } else {
+#pragma unroll
+            for (int32_t k = 0; k < BLOCK_SIZE; k++) {
+                dotProd += sM[ty][k] * sN[k][tx];
+            }
         }
         __syncthreads();
     }
@@ -196,7 +206,7 @@ static bool checkMatrixEqual(const float* P1, const float* P2, const int32_t wid
             if (P1[r * width + c] != P2[r * width + c]) {
                 fprintf(stdout, "P1[%f] != P2[%f] at row = %d, col = %d\n", P1[r * width + c],
                         P2[r * width + c], r, c);
-                 return false;
+                return false;
             }
         }
     }
@@ -211,8 +221,8 @@ int main() {
     queryAndSetDevice();
 
     // Setup matrix dimensions - outer dimensions must be equal
-    dim3 dimMatrixM(400, 600);  // cols = 400; rows = 600
-    dim3 dimMatrixN(600, 400);  // cols = 600; rows = 400
+    dim3 dimMatrixM(500, 600);  // cols = 500; rows = 600
+    dim3 dimMatrixN(600, 500);  // cols = 600; rows = 500
 
     // Allocate needed memory on the host
     float* hostM = (float*)malloc(dimMatrixM.y * dimMatrixM.x * sizeof(float));
