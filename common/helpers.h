@@ -6,7 +6,8 @@
 #include <cassert>
 
 template <typename T>
-void checkError(T errorCode, const char* funcName, const char* fileName, const int line) {
+static inline void checkError(T errorCode, const char* funcName, const char* fileName,
+                              const int line) {
     if (errorCode) {
         fprintf(stderr, "CUDA runtime error: %s returned error code %d in %s, line %d", funcName,
                 (unsigned int)errorCode, fileName, line);
@@ -17,11 +18,11 @@ void checkError(T errorCode, const char* funcName, const char* fileName, const i
 #define handleCUDAError(func) checkError((func), #func, __FILE__, __LINE__)
 
 template <typename Duration, typename TimePoint>
-int64_t cpuDuration(TimePoint startTime, TimePoint endTime) {
+static inline int64_t cpuDuration(TimePoint startTime, TimePoint endTime) {
     return std::chrono::duration_cast<Duration>(endTime - startTime).count();
 }
 
-inline int smVersion2Cores(const int majorVer, const int minorVer) {
+static inline int smVersion2Cores(const int majorVer, const int minorVer) {
     typedef struct {
         int smVersion;
         int numCores;
@@ -49,7 +50,7 @@ inline int smVersion2Cores(const int majorVer, const int minorVer) {
     return -1;
 }
 
-void queryAndSetDevice() {
+static inline void queryAndSetDevice() {
     int deviceCount = 0;
     handleCUDAError(cudaGetDeviceCount(&deviceCount));
     if (deviceCount == 0) {
@@ -57,19 +58,19 @@ void queryAndSetDevice() {
         exit(EXIT_FAILURE);
     }
 
-    int maxComputePerf = -1, maxPerfDevice = -1, cudaCores = -1;
+    int32_t maxComputePerf = -1, maxPerfDevice = -1, cudaCores = -1;
     cudaDeviceProp deviceProps;
-    for (int i = 0; i < deviceCount; i++) {
+    for (int32_t i = 0; i < deviceCount; i++) {
         handleCUDAError(cudaGetDeviceProperties(&deviceProps, i));
-        int multiprocessorCount = deviceProps.multiProcessorCount;
-        int clockRate = deviceProps.clockRate;
-        int majorVer = deviceProps.major;
-        int minorVer = deviceProps.minor;
-        int numCoresPerSm = smVersion2Cores(majorVer, minorVer);
+        int32_t multiprocessorCount = deviceProps.multiProcessorCount;
+        int32_t clockRate = deviceProps.clockRate;
+        int32_t majorVer = deviceProps.major;
+        int32_t minorVer = deviceProps.minor;
+        int32_t numCoresPerSm = smVersion2Cores(majorVer, minorVer);
         assert(numCoresPerSm != -1);
         int64_t computePerf = (int64_t)multiprocessorCount * numCoresPerSm * clockRate;
         if (computePerf > maxComputePerf) {
-            maxComputePerf = computePerf;
+            maxComputePerf = (int32_t)computePerf;
             maxPerfDevice = i;
             cudaCores = numCoresPerSm;
         }
@@ -91,13 +92,11 @@ void queryAndSetDevice() {
     printf("   --- MP Information for device %d ---\n", maxPerfDevice);
     printf("Multiprocessor count: %d\n", deviceProps.multiProcessorCount);
     printf("Cuda cores per MP: %d\n", cudaCores);
-    printf("Shared memory per MP: %zu Bytes\n", deviceProps.sharedMemPerBlock);
+    printf("Shared memory per MP: %zu MB\n", deviceProps.sharedMemPerBlock / (size_t)1e3);
     printf("Registers per MP: %d\n", deviceProps.regsPerBlock);
     printf("Max number of thread blocks per MP: %d\n", deviceProps.maxBlocksPerMultiProcessor);
     printf("Threads in warp: %d\n", deviceProps.warpSize);
     printf("Max threads per block: %d\n", deviceProps.maxThreadsPerBlock);
-    printf("Max grid dimensions: (%d, %d, %d)\n", deviceProps.maxGridSize[0],
-           deviceProps.maxGridSize[1], deviceProps.maxGridSize[2]);
     printf("\n");
 
     handleCUDAError(cudaSetDevice(maxPerfDevice));

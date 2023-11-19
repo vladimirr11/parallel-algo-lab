@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "image_blur", "image_blur\im
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic_vs_tiled_matrix_mul", "basic_vs_tiled_matrix_mul\basic_vs_tiled_matrix_mul.vcxproj", "{C9D8C2ED-7AF1-492C-9C18-B71B9B88BCFF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "convolution", "convolution\convolution.vcxproj", "{F0A063B5-6570-4782-B26D-8E76ECFA856A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,6 +35,10 @@ Global
 		{C9D8C2ED-7AF1-492C-9C18-B71B9B88BCFF}.Debug|x64.Build.0 = Debug|x64
 		{C9D8C2ED-7AF1-492C-9C18-B71B9B88BCFF}.Release|x64.ActiveCfg = Release|x64
 		{C9D8C2ED-7AF1-492C-9C18-B71B9B88BCFF}.Release|x64.Build.0 = Release|x64
+		{F0A063B5-6570-4782-B26D-8E76ECFA856A}.Debug|x64.ActiveCfg = Debug|x64
+		{F0A063B5-6570-4782-B26D-8E76ECFA856A}.Debug|x64.Build.0 = Debug|x64
+		{F0A063B5-6570-4782-B26D-8E76ECFA856A}.Release|x64.ActiveCfg = Release|x64
+		{F0A063B5-6570-4782-B26D-8E76ECFA856A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

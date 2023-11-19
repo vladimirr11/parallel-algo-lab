@@ -221,8 +221,8 @@ int main() {
     queryAndSetDevice();
 
     // Setup matrix dimensions - outer dimensions must be equal
-    dim3 dimMatrixM(500, 600);  // cols = 500; rows = 600
-    dim3 dimMatrixN(600, 500);  // cols = 600; rows = 500
+    dim3 dimMatrixM(900, 1000);  
+    dim3 dimMatrixN(1000, 1100);  
 
     // Allocate needed memory on the host
     float* hostM = (float*)malloc(dimMatrixM.y * dimMatrixM.x * sizeof(float));
