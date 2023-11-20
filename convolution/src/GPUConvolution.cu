@@ -1,7 +1,49 @@
 #include <device_launch_parameters.h>
+#ifndef __CUDACC__  // for __syncthreads()
+#define __CUDACC__
+#endif
+#include <device_functions.h>
 #include "Convolution.h"
 
-__global__ void gpu1DConvolutionKernel(const float* devInput, float* devOutput, const float* kernel,
+// Storage for the convolution kernel
+__constant__ float kernel[KERNEL_SIZE];
+
+void __global__ tiled1DConvolutionKernel(const float* input, float* output,
+                                         const int32_t inputWidth) {
+    const int32_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+    __shared__ float sharedData[TILE_SIZE_1D + KERNEL_SIZE - 1];
+
+    const int32_t halfKernSize = KERNEL_SIZE / 2;
+
+    // Load left halo cells in per block shared memory
+    const int32_t leftHaloCellIdx = (blockIdx.x - 1) * blockDim.x + threadIdx.x;
+    if (threadIdx.x >= (blockDim.x - halfKernSize)) {
+        sharedData[threadIdx.x - (blockDim.x - halfKernSize)] =
+            leftHaloCellIdx < 0 ? 0 : input[leftHaloCellIdx];
+    }
+
+    // Load inner cells in shared memory
+    sharedData[halfKernSize + threadIdx.x] = input[tid];
+
+    // Load right halo cells
+    const int32_t rightHaloCellIdx = (blockIdx.x + 1) * blockDim.x + threadIdx.x;
+    if (threadIdx.x < halfKernSize) {
+        sharedData[halfKernSize + blockDim.x + threadIdx.x] =
+            rightHaloCellIdx >= inputWidth ? 0 : input[rightHaloCellIdx];
+    }
+
+    __syncthreads();
+
+    float currSum = 0.f;
+#pragma unroll
+    for (int32_t i = 0; i < KERNEL_SIZE; i++) {
+        currSum += sharedData[threadIdx.x + i] * kernel[i];
+    }
+
+    output[tid] = currSum;
+}
+
+__global__ void gpu1DConvolutionKernel(const float* devInput, float* devOutput,
                                        const int32_t inputWidth) {
     const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -27,10 +69,11 @@ void set1DGPUConvolution(const float* hostInput, float* hostOutput, const float*
     handleCUDAError(cudaMalloc((void**)&devOutput, numBytes));
     handleCUDAError(cudaMalloc((void**)&devKernel, KERNEL_SIZE * sizeof(float)));
 
-    // Transfer data to device
+    // Transfer data to global memory of the device
     handleCUDAError(cudaMemcpy(devInput, hostInput, numBytes, cudaMemcpyHostToDevice));
-    handleCUDAError(
-        cudaMemcpy(devKernel, hostKernel, KERNEL_SIZE * sizeof(float), cudaMemcpyHostToDevice));
+
+    // Transfer data to the constant memory of the device
+    handleCUDAError(cudaMemcpyToSymbol(kernel, hostKernel, KERNEL_SIZE * sizeof(float)));
 
     // Create event handles
     cudaEvent_t start, stop;
@@ -40,8 +83,10 @@ void set1DGPUConvolution(const float* hostInput, float* hostOutput, const float*
     // Start timer and launch kernel
     const int32_t dimx = 16;
     handleCUDAError(cudaEventRecord(start));
-    gpu1DConvolutionKernel<<<ceil(inputWidth / (float)dimx), dimx>>>(devInput, devOutput, devKernel,
-                                                                     inputWidth);
+    tiled1DConvolutionKernel<<<ceil(inputWidth / (float)dimx), dimx>>>(devInput, devOutput,
+                                                                       inputWidth);
+     //gpu1DConvolutionKernel<<<ceil(inputWidth / (float)dimx), dimx>>>(devInput, devOutput,
+     //                                                                 inputWidth);
     handleCUDAError(cudaEventRecord(stop));
 
     // Synchronize with kernel execution
@@ -60,5 +105,4 @@ void set1DGPUConvolution(const float* hostInput, float* hostOutput, const float*
     // Deallocate memory
     handleCUDAError(cudaFree(devInput));
     handleCUDAError(cudaFree(devOutput));
-    handleCUDAError(cudaFree(devKernel));
 }

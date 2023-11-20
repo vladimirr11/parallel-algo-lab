@@ -1,7 +1,7 @@
 ﻿// Own includes
 #include "Convolution.h"
 
-static constexpr int32_t DATA_SIZE_PER_DIM = 1024 * 32;
+static constexpr int32_t DATA_SIZE_PER_DIM = 1024 * 1024 * 100;
 
 int main() {
     printf("[Exploring 1D and 2D convolution algorithms]\n\n");
