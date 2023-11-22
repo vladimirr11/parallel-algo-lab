@@ -101,3 +101,20 @@ static inline void queryAndSetDevice() {
 
     handleCUDAError(cudaSetDevice(maxPerfDevice));
 }
+
+template <typename T>
+static inline bool compare1DArraysForEquality(const T* benchmark, const T* testArr,
+                                              const size_t arrSize) {
+    printf("Start test for arrays equality...\n");
+    for (size_t i = 0; i < arrSize; i++) {
+        if (benchmark[i] != testArr[i]) {
+            std::cout << "BenchmarkArray[" << benchmark[i] << "] != TestArray[" << testArr[i]
+                      << "] at index " << i << "\n";
+            printf("Test - NOT PASSED\n");
+            return false;
+        }
+    }
+
+    printf("Test - PASSED\n");
+    return true;
+}

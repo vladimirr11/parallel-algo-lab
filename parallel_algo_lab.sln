@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic_vs_tiled_matrix_mul",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "convolution", "convolution\convolution.vcxproj", "{F0A063B5-6570-4782-B26D-8E76ECFA856A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "parallel_scan", "parallel_scan\parallel_scan.vcxproj", "{E821C4C6-95D6-4FF6-8F5B-7F7F2D40A119}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +41,10 @@ Global
 		{F0A063B5-6570-4782-B26D-8E76ECFA856A}.Debug|x64.Build.0 = Debug|x64
 		{F0A063B5-6570-4782-B26D-8E76ECFA856A}.Release|x64.ActiveCfg = Release|x64
 		{F0A063B5-6570-4782-B26D-8E76ECFA856A}.Release|x64.Build.0 = Release|x64
+		{E821C4C6-95D6-4FF6-8F5B-7F7F2D40A119}.Debug|x64.ActiveCfg = Debug|x64
+		{E821C4C6-95D6-4FF6-8F5B-7F7F2D40A119}.Debug|x64.Build.0 = Debug|x64
+		{E821C4C6-95D6-4FF6-8F5B-7F7F2D40A119}.Release|x64.ActiveCfg = Release|x64
+		{E821C4C6-95D6-4FF6-8F5B-7F7F2D40A119}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
