@@ -11,3 +11,4 @@ bin/
 
 # Files
 *.vcxproj*
+*.sln
