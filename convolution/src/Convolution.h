@@ -31,6 +31,3 @@ extern void __global__ gpu1DConvolutionKernel(const float* input, float* output,
 
 extern void __global__ tiled1DConvolutionKernel(const float* input, float* output,
                                                 const int32_t inputWidth);
-
-// extern void gpu2DConvolutionKernel(const float* input, float* output, const float* kernel,
-//                                    const int32_t inputWidth, const int32_t inputHeight);

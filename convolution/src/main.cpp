@@ -4,7 +4,7 @@
 static constexpr int32_t DATA_SIZE_PER_DIM = 1024 * 1024 * 100;
 
 int main() {
-    printf("[Exploring 1D and 2D convolution algorithms]\n\n");
+    printf("[Exploring convolution algorithms]\n\n");
 
     // Set device
     printf("Setting device...\n");

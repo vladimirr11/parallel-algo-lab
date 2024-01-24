@@ -25,10 +25,9 @@ inline void cpuVectorAdd(float* hostA, float* hostB, float* hostC, const int n) 
 
 // Compute vector sum C = A + B
 __global__ void vectorAddKernel(const float* A, const float* B, float* C, const int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i <= n && i >= 0) {
-        C[i] = A[i] + B[i];
-        //printf("%d\n", i);
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid <= n) {
+        C[tid] = A[tid] + B[tid];
     }
 }
 
@@ -57,12 +56,16 @@ void gpuVectorAdd(const float* hostA, const float* hostB, float* hostC, const in
     vectorAddKernel<<<numThreadBlocks, threadsPerBlock>>>(devA, devB, devC, n);
     handleCUDAError(cudaEventRecord(stop, 0));
 
+    // synchronize with kernel execution
+    handleCUDAError(cudaEventSynchronize(stop));
+
+    float gpuTime;
+    handleCUDAError(cudaEventElapsedTime(&gpuTime, start, stop));
+
     // thansfer data back to the host
     handleCUDAError(cudaMemcpy(hostC, devC, numBytes, cudaMemcpyDeviceToHost));
 
     const float devResult = calcKahamSum(hostC, n);
-    float gpuTime;
-    handleCUDAError(cudaEventElapsedTime(&gpuTime, start, stop));
     fprintf(stdout, "GPU time for vector addition of %d elements: [%f] - result %f\n", n, gpuTime,
             devResult);
 
@@ -101,6 +104,8 @@ int main() {
             cpuTime, hostResult);
 
     float* hostCC = (float*)malloc(numElements * sizeof(float));
+
+    // run on the gpu
     gpuVectorAdd(hostA, hostB, hostCC, numElements);
 
     // free host memory

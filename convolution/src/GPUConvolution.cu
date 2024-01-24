@@ -8,7 +8,7 @@
 // Storage for the convolution kernel
 __constant__ float kernel[KERNEL_SIZE];
 
-void __global__ tiled1DConvolutionKernel(const float* input, float* output,
+__global__ void tiled1DConvolutionKernel(const float* input, float* output,
                                          const int32_t inputWidth) {
     const int32_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     __shared__ float sharedData[TILE_SIZE_1D + KERNEL_SIZE - 1];
@@ -23,12 +23,12 @@ void __global__ tiled1DConvolutionKernel(const float* input, float* output,
     }
 
     // Load inner cells in shared memory
-    sharedData[halfKernSize + threadIdx.x] = input[tid];
+    sharedData[threadIdx.x + halfKernSize] = input[tid];
 
     // Load right halo cells
     const int32_t rightHaloCellIdx = (blockIdx.x + 1) * blockDim.x + threadIdx.x;
     if (threadIdx.x < halfKernSize) {
-        sharedData[halfKernSize + blockDim.x + threadIdx.x] =
+        sharedData[threadIdx.x + blockDim.x + halfKernSize] =
             rightHaloCellIdx >= inputWidth ? 0 : input[rightHaloCellIdx];
     }
 
@@ -81,12 +81,12 @@ void set1DGPUConvolution(const float* hostInput, float* hostOutput, const float*
     handleCUDAError(cudaEventCreate(&stop));
 
     // Start timer and launch kernel
-    const int32_t dimx = 16;
+    const int32_t dimx = 256;
     handleCUDAError(cudaEventRecord(start));
     tiled1DConvolutionKernel<<<ceil(inputWidth / (float)dimx), dimx>>>(devInput, devOutput,
                                                                        inputWidth);
-     //gpu1DConvolutionKernel<<<ceil(inputWidth / (float)dimx), dimx>>>(devInput, devOutput,
-     //                                                                 inputWidth);
+    // gpu1DConvolutionKernel<<<ceil(inputWidth / (float)dimx), dimx>>>(devInput, devOutput,
+    //                                                                  inputWidth);
     handleCUDAError(cudaEventRecord(stop));
 
     // Synchronize with kernel execution

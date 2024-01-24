@@ -11,9 +11,7 @@
 #include "common/stbi_image/stbi_image.h"
 #include "common/stbi_image/stbi_image_write.h"
 
-/// @brief Blurs an image.
-/// Note: this kernel will work only for rgb images. For grayscale images it
-/// will not work.
+/// @brief Blurs a rgb image
 __global__ void imageBlurKernel(const unsigned char* inputPixels, unsigned char* outputPixels,
                                 const int width, const int height, const int numChannels,
                                 const int blurKernelSize) {
@@ -81,7 +79,7 @@ int main() {
     handleCUDAError(cudaEventCreate(&stop));
 
     // kernel execution configuration
-    const int threadBlockDim = 16;
+    const int threadBlockDim = 32;
     const int gridWidth = ceil((float)(width) / threadBlockDim);
     const int gridHeight = ceil((float)(height) / threadBlockDim);
     dim3 dimGrid(gridWidth, gridHeight, 1);

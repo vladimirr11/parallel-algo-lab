@@ -121,9 +121,6 @@ static void matrixMulGPU(const float* hostM, const float* hostN, float* hostP1, 
                                                 dimHostN.x);
     handleCUDAError(cudaEventRecord(stop, 0));
 
-    // Thansfer data back to the host
-    handleCUDAError(cudaMemcpy(hostP1, devP1, numBytesDevP, cudaMemcpyDeviceToHost));
-
     // Synchronize with kernel execution
     handleCUDAError(cudaEventSynchronize(stop));
 
@@ -131,6 +128,9 @@ static void matrixMulGPU(const float* hostM, const float* hostN, float* hostP1, 
     handleCUDAError(cudaEventElapsedTime(&gpuTime, start, stop));
     fprintf(stdout, "M[%d, %d] x N[%d, %d] matrices multiplied for %.2f miliseconds\n", dimHostM.y,
             dimHostM.x, dimHostN.y, dimHostN.x, gpuTime);
+
+    // Thansfer data back to the host
+    handleCUDAError(cudaMemcpy(hostP1, devP1, numBytesDevP, cudaMemcpyDeviceToHost));
 
     // Tiled matrix mutiplication
     // ----------------------------------------------------------------------------------
@@ -140,15 +140,14 @@ static void matrixMulGPU(const float* hostM, const float* hostN, float* hostP1, 
     tiledMatrixMulKernel<<<dimGrid, dimBlock>>>(devM, devN, devP2, dimHostM.y, dimHostM.x,
                                                 dimHostN.y, dimHostN.x);
     handleCUDAError(cudaEventRecord(stop, 0));
-
-    handleCUDAError(cudaMemcpy(hostP2, devP2, numBytesDevP, cudaMemcpyDeviceToHost));
-
     handleCUDAError(cudaEventSynchronize(stop));
 
     gpuTime = 0.f;
     handleCUDAError(cudaEventElapsedTime(&gpuTime, start, stop));
     fprintf(stdout, "M[%d, %d] x N[%d, %d] matrices multiplied for %.2f miliseconds\n", dimHostM.y,
             dimHostM.x, dimHostN.y, dimHostN.x, gpuTime);
+
+    handleCUDAError(cudaMemcpy(hostP2, devP2, numBytesDevP, cudaMemcpyDeviceToHost));
 
     // Free device memory
     handleCUDAError(cudaFree(devM));
@@ -221,8 +220,8 @@ int main() {
     queryAndSetDevice();
 
     // Setup matrix dimensions - outer dimensions must be equal
-    dim3 dimMatrixM(900, 1000);  
-    dim3 dimMatrixN(1000, 1100);  
+    dim3 dimMatrixM(900, 1000);
+    dim3 dimMatrixN(1000, 1100);
 
     // Allocate needed memory on the host
     float* hostM = (float*)malloc(dimMatrixM.y * dimMatrixM.x * sizeof(float));
