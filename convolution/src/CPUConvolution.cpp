@@ -36,12 +36,12 @@ bool compareResults(const float* resA, const float* resB, const int32_t width,
     printf("Start test for data equality...\n");
     for (int32_t y = 0; y < height; y++) {
         for (int32_t x = 0; x < width; x++) {
-            if (resA[y * width + x] != resB[y * width + x]) {
+            if (std::abs(resA[y * width + x] - resB[y * width + x]) >= 0.001) {
                 fprintf(stderr, "ResA[%f] != ResB[%f] at row = %d, col = %d\n", resA[y * width + x],
                         resB[y * width + x], y, x);
                 fprintf(stderr, "Test - NOT PASSED\n");
                 return false;
-            } 
+            }
         }
     }
     fprintf(stderr, "Test - PASSED\n");

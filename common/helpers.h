@@ -9,8 +9,9 @@ template <typename T>
 static inline void checkError(T errorCode, const char* funcName, const char* fileName,
                               const int line) {
     if (errorCode) {
-        fprintf(stderr, "CUDA runtime error: %s returned error code %d in %s, line %d", funcName,
-                (unsigned int)errorCode, fileName, line);
+        fprintf(stderr,
+                "CUDA runtime error: %s returned error code %d with message %s in %s, line %d",
+                funcName, (unsigned int)errorCode, cudaGetErrorString(errorCode), fileName, line);
         exit(EXIT_FAILURE);
     }
 }

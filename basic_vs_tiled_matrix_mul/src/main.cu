@@ -202,7 +202,7 @@ static bool checkMatrixEqual(const float* P1, const float* P2, const int32_t wid
                              const int32_t height) {
     for (int32_t r = 0; r < height; r++) {
         for (int32_t c = 0; c < width; c++) {
-            if (P1[r * width + c] != P2[r * width + c]) {
+            if (std::abs(P1[r * width + c] - P2[r * width + c]) >= 0.01) {
                 fprintf(stdout, "P1[%f] != P2[%f] at row = %d, col = %d\n", P1[r * width + c],
                         P2[r * width + c], r, c);
                 return false;

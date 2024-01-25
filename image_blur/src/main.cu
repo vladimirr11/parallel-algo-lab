@@ -55,7 +55,7 @@ int main() {
 
     // load image
     int width, height, numChannels;
-    const char* imagePath = "../image_blur/data/royal-bengal-tiger-1000x664.jpg";
+    const char* imagePath = "data/royal-bengal-tiger-1000x664.jpg";
     unsigned char* inputImage = stbi_load(imagePath, &width, &height, &numChannels, 0);
     if (!inputImage) {
         fprintf(stderr, "stbi_image failed to load image %s\n", imagePath);

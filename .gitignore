@@ -11,4 +11,5 @@ bin/
 
 # Files
 *.vcxproj*
-*.sln
+parallel_algo_lab.sln
+graph_search/
