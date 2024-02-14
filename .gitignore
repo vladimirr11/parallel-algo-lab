@@ -13,3 +13,5 @@ bin/
 *.vcxproj*
 parallel_algo_lab.sln
 graph_search/
+quad_tree/
+smem_access_patterns/

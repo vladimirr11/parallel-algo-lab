@@ -9,7 +9,7 @@
 // Own includes
 #include "common/helpers.h"
 
-static constexpr int32_t BLOCK_SIZE = 256;
+static constexpr int32_t BLOCK_SIZE = 1024;
 static constexpr int32_t SCAN_ARR_SIZE = 1024 * BLOCK_SIZE;
 static constexpr int32_t PARTIAL_SUMS_ARRAY_SIZE = SCAN_ARR_SIZE / BLOCK_SIZE;
 static constexpr int64_t SCAN_ARR_NUM_BYTES = SCAN_ARR_SIZE * sizeof(int32_t);
@@ -82,6 +82,15 @@ __global__ void scanLastPhaseKernel(int32_t* output, int32_t* partialSums) {
 /// @brief Run hierarchical inclusive scan
 inline void runMultiplePassInclusiveScan(const int32_t* devInput, int32_t* devOutput,
                                          int32_t* devPartialSums) {
+    int32_t blockSize;    // The launch configurator returned block size
+    int32_t minGridSize;  // The minimum grid size needed to achieve the
+                          // maximum occupancy for a full device launch
+    int32_t gridSize;     // The actual grid size needed, based on input size
+
+    cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, inclusiveScanKernel, 0, 0);
+    // Round up according to array size
+    gridSize = (SCAN_ARR_SIZE + blockSize - 1) / blockSize;
+
     // Kernels launch
     inclusiveScanKernel<<<ceil((float)SCAN_ARR_SIZE / (float)BLOCK_SIZE), BLOCK_SIZE>>>(
         devInput, devOutput, devPartialSums);
