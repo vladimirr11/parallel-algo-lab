@@ -1,2 +1,2 @@
 # Parallel algo lab
-Implementation of common parallel algorithms and patterns using CUDA
+Implementation of parallel algorithms using CUDA.
